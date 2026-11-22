@@ -1,0 +1,158 @@
+{
+  "entities": {
+    "Spice": {
+      "title": "Spice",
+      "description": "A single-origin spice product listed in the One Spice storefront catalog.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "maxLength": 120 },
+        "botanicalName": { "type": "string", "maxLength": 120 },
+        "category": { "type": "string", "enum": ["Floral & Rare", "Warming & Sweet", "Heat & Smoke", "Earthy & Bold"] },
+        "grade": { "type": "string", "maxLength": 120 },
+        "image": { "type": "string", "maxLength": 450000 },
+        "imageAlt": { "type": "string", "maxLength": 240 },
+        "shortDescription": { "type": "string", "maxLength": 360 },
+        "inStock": { "type": "boolean" },
+        "lotCode": { "type": "string", "maxLength": 64 },
+        "weightTiers": { "type": "array" },
+        "tastingNotes": { "type": "object" },
+        "culinaryUses": { "type": "array" },
+        "origin": { "type": "object" },
+        "pairings": { "type": "array" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "id", "name", "botanicalName", "category", "grade", "image", "imageAlt",
+        "shortDescription", "inStock", "lotCode", "weightTiers", "tastingNotes",
+        "culinaryUses", "origin", "pairings", "updatedAt"
+      ]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer order submitted from the One Spice shopping bag in UGX.",
+      "type": "object",
+      "properties": {
+        "orderNumber": { "type": "string", "maxLength": 32 },
+        "customerName": { "type": "string", "maxLength": 120 },
+        "customerPhone": { "type": "string", "maxLength": 40 },
+        "customerEmail": { "type": "string", "maxLength": 160 },
+        "fulfillment": { "type": "string", "enum": ["pickup", "delivery"] },
+        "deliveryAddress": { "type": "string", "maxLength": 240 },
+        "paymentMethod": { "type": "string", "enum": ["momo", "airtel", "cod"] },
+        "paymentPhone": { "type": "string", "maxLength": 40 },
+        "paymentReference": { "type": "string", "maxLength": 120 },
+        "paymentConfirmed": { "type": "boolean" },
+        "notes": { "type": "string", "maxLength": 500 },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "total": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Preparing", "Ready", "Completed", "Cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "orderNumber", "customerName", "customerPhone", "customerEmail", "fulfillment",
+        "deliveryAddress", "paymentMethod", "paymentPhone", "paymentReference", "paymentConfirmed",
+        "notes", "items", "subtotal", "deliveryFee", "total", "status", "createdAt", "updatedAt"
+      ]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "A customer inquiry submitted from the One Spice Contact page.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 120 },
+        "email": { "type": "string", "maxLength": 160 },
+        "topic": { "type": "string", "maxLength": 120 },
+        "message": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["New", "Replied"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "topic", "message", "status", "createdAt"]
+    },
+    "AdminAccount": {
+      "title": "AdminAccount",
+      "description": "Role-based admin account directory keyed by sanitized email.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 160 },
+        "displayName": { "type": "string", "maxLength": 120 },
+        "role": { "type": "string", "enum": ["admin", "major_admin"] },
+        "mustChangePassword": { "type": "boolean" },
+        "createdBy": { "type": "string", "maxLength": 160 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "displayName", "role", "mustChangePassword", "createdBy", "createdAt", "updatedAt"]
+    },
+    "PasswordResetRequest": {
+      "title": "PasswordResetRequest",
+      "description": "Admin password reset request escalated to Major Admins.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 160 },
+        "note": { "type": "string", "maxLength": 300 },
+        "status": { "type": "string", "enum": ["Pending", "Resolved"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "note", "status", "createdAt"]
+    },
+    "PaymentSettings": {
+      "title": "PaymentSettings",
+      "description": "Shop +256 MTN MoMo and Airtel Pay merchant receiving numbers.",
+      "type": "object",
+      "properties": {
+        "momoNumber": { "type": "string", "maxLength": 32 },
+        "momoName": { "type": "string", "maxLength": 120 },
+        "airtelNumber": { "type": "string", "maxLength": 32 },
+        "airtelName": { "type": "string", "maxLength": 120 },
+        "updatedBy": { "type": "string", "maxLength": 160 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["momoNumber", "momoName", "airtelNumber", "airtelName", "updatedBy", "updatedAt"]
+    },
+    "SecuritySettings": {
+      "title": "SecuritySettings",
+      "description": "Global admin session epoch for signing out all active admins.",
+      "type": "object",
+      "properties": {
+        "sessionEpoch": { "type": "number" },
+        "updatedBy": { "type": "string", "maxLength": 160 },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sessionEpoch", "updatedBy", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/spices/{spiceId}": {
+      "schema": { "$ref": "#/entities/Spice" },
+      "description": "Publicly readable spice catalog; any admin can create/update/delete."
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Customer orders in UGX; Major Admin only reads and updates."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/Inquiry" },
+      "description": "Customer inquiries; Major Admin only reads and updates."
+    },
+    "/adminAccounts/{accountId}": {
+      "schema": { "$ref": "#/entities/AdminAccount" },
+      "description": "Admin and Major Admin directory."
+    },
+    "/passwordResetRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/PasswordResetRequest" },
+      "description": "Admin password recovery requests for Major Admins."
+    },
+    "/settings/payments": {
+      "schema": { "$ref": "#/entities/PaymentSettings" },
+      "description": "Publicly readable +256 MoMo and Airtel Pay merchant numbers; Major Admin writes."
+    },
+    "/settings/security": {
+      "schema": { "$ref": "#/entities/SecuritySettings" },
+      "description": "Admin session epoch; Major Admin writes."
+    }
+  }
+}

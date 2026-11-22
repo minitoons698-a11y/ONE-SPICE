@@ -1,0 +1,274 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasTrustedEmail() {
+      return isSignedIn() && request.auth.token.email is string && (
+        request.auth.token.email_verified == true ||
+        request.auth.token.firebase.sign_in_provider == 'password'
+      );
+    }
+
+    function emailKey() {
+      return request.auth.token.email.lower().replace('[^a-z0-9]', '_');
+    }
+
+    function isBootstrappedMajorAdmin() {
+      return hasTrustedEmail() && (
+        request.auth.token.email.lower() == 'geraldjabin698@gmail.com' ||
+        (request.auth.token.email.lower() == 'minitoons698@gmail.com' && request.auth.token.email_verified == true)
+      );
+    }
+
+    function hasAdminDoc() {
+      return hasTrustedEmail() && exists(/databases/$(database)/documents/adminAccounts/$(emailKey()));
+    }
+
+    function isMajorAdmin() {
+      return isBootstrappedMajorAdmin() || (
+        hasAdminDoc() &&
+        get(/databases/$(database)/documents/adminAccounts/$(emailKey())).data.role == 'major_admin'
+      );
+    }
+
+    function isAnyAdmin() {
+      return isBootstrappedMajorAdmin() || hasAdminDoc();
+    }
+
+    function isValidSpice(data) {
+      return data.keys().hasAll([
+          'id', 'name', 'botanicalName', 'category', 'grade', 'image', 'imageAlt',
+          'shortDescription', 'inStock', 'lotCode', 'weightTiers', 'tastingNotes',
+          'culinaryUses', 'origin', 'pairings', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'name', 'botanicalName', 'category', 'grade', 'image', 'imageAlt',
+          'shortDescription', 'inStock', 'lotCode', 'weightTiers', 'tastingNotes',
+          'culinaryUses', 'origin', 'pairings', 'updatedAt'
+        ])
+        && isValidId(data.id)
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 120
+        && data.botanicalName is string && data.botanicalName.size() <= 120
+        && data.category is string && data.category in ['Floral & Rare', 'Warming & Sweet', 'Heat & Smoke', 'Earthy & Bold']
+        && data.grade is string && data.grade.size() <= 120
+        && data.image is string && data.image.size() >= 1 && data.image.size() <= 450000
+        && data.imageAlt is string && data.imageAlt.size() <= 240
+        && data.shortDescription is string && data.shortDescription.size() >= 1 && data.shortDescription.size() <= 360
+        && data.inStock is bool
+        && data.lotCode is string && data.lotCode.size() <= 64
+        && data.weightTiers is list && data.weightTiers.size() >= 1 && data.weightTiers.size() <= 5 && data.weightTiers[0] is map
+        && data.tastingNotes is map
+        && data.tastingNotes.keys().hasAll(['summary', 'aroma', 'palate', 'finish', 'sensory'])
+        && data.tastingNotes.keys().hasOnly(['summary', 'aroma', 'palate', 'finish', 'sensory'])
+        && data.tastingNotes.summary is string && data.tastingNotes.summary.size() <= 600
+        && data.tastingNotes.aroma is string && data.tastingNotes.aroma.size() <= 240
+        && data.tastingNotes.palate is string && data.tastingNotes.palate.size() <= 240
+        && data.tastingNotes.finish is string && data.tastingNotes.finish.size() <= 240
+        && data.tastingNotes.sensory is map
+        && data.culinaryUses is list && data.culinaryUses.size() >= 1 && data.culinaryUses.size() <= 6 && data.culinaryUses[0] is map
+        && data.origin is map
+        && data.origin.keys().hasAll(['country', 'region', 'coordinates', 'elevation', 'harvestSeason', 'curingMethod', 'story'])
+        && data.origin.keys().hasOnly(['country', 'region', 'coordinates', 'elevation', 'harvestSeason', 'curingMethod', 'story'])
+        && data.origin.country is string && data.origin.country.size() <= 80
+        && data.origin.region is string && data.origin.region.size() <= 120
+        && data.origin.coordinates is string && data.origin.coordinates.size() <= 64
+        && data.origin.elevation is string && data.origin.elevation.size() <= 40
+        && data.origin.harvestSeason is string && data.origin.harvestSeason.size() <= 100
+        && data.origin.curingMethod is string && data.origin.curingMethod.size() <= 160
+        && data.origin.story is string && data.origin.story.size() <= 600
+        && data.pairings is list && data.pairings.size() <= 6 && (data.pairings.size() == 0 || data.pairings[0] is string)
+        && data.updatedAt == request.time;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll([
+          'orderNumber', 'customerName', 'customerPhone', 'customerEmail', 'fulfillment',
+          'deliveryAddress', 'paymentMethod', 'paymentPhone', 'paymentReference', 'paymentConfirmed',
+          'notes', 'items', 'subtotal', 'deliveryFee', 'total',
+          'status', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'orderNumber', 'customerName', 'customerPhone', 'customerEmail', 'fulfillment',
+          'deliveryAddress', 'paymentMethod', 'paymentPhone', 'paymentReference', 'paymentConfirmed',
+          'notes', 'items', 'subtotal', 'deliveryFee', 'total',
+          'status', 'createdAt', 'updatedAt'
+        ])
+        && data.orderNumber is string && data.orderNumber.size() >= 3 && data.orderNumber.size() <= 32
+        && data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 120
+        && data.customerPhone is string && data.customerPhone.size() >= 4 && data.customerPhone.size() <= 40
+        && data.customerEmail is string && data.customerEmail.size() <= 160
+        && data.fulfillment is string && data.fulfillment in ['pickup', 'delivery']
+        && data.deliveryAddress is string && data.deliveryAddress.size() <= 240
+        && data.paymentMethod is string && data.paymentMethod in ['momo', 'airtel', 'cod']
+        && data.paymentPhone is string && data.paymentPhone.size() <= 40
+        && data.paymentReference is string && data.paymentReference.size() <= 120
+        && data.paymentConfirmed is bool
+        && data.notes is string && data.notes.size() <= 500
+        && data.items is list && data.items.size() >= 1 && data.items.size() <= 30 && data.items[0] is map
+        && data.subtotal is number && data.subtotal >= 0
+        && data.deliveryFee is number && data.deliveryFee >= 0
+        && data.total is number && data.total >= 0
+        && data.status is string && data.status in ['Pending', 'Preparing', 'Ready', 'Completed', 'Cancelled']
+        && data.createdAt is timestamp
+        && data.updatedAt == request.time;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['name', 'email', 'topic', 'message', 'status', 'createdAt'])
+        && data.keys().hasOnly(['name', 'email', 'topic', 'message', 'status', 'createdAt'])
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 120
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.topic is string && data.topic.size() >= 1 && data.topic.size() <= 120
+        && data.message is string && data.message.size() >= 1 && data.message.size() <= 2000
+        && data.status is string && data.status in ['New', 'Replied']
+        && data.createdAt is timestamp;
+    }
+
+    function isValidAdminAccount(data) {
+      return data.keys().hasAll(['email', 'displayName', 'role', 'mustChangePassword', 'createdBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['email', 'displayName', 'role', 'mustChangePassword', 'createdBy', 'createdAt', 'updatedAt'])
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120
+        && data.role is string && data.role in ['admin', 'major_admin']
+        && data.mustChangePassword is bool
+        && data.createdBy is string && data.createdBy.size() <= 160
+        && data.createdAt is timestamp
+        && data.updatedAt == request.time;
+    }
+
+    function isValidResetRequest(data) {
+      return data.keys().hasAll(['email', 'note', 'status', 'createdAt'])
+        && data.keys().hasOnly(['email', 'note', 'status', 'createdAt'])
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.note is string && data.note.size() <= 300
+        && data.status is string && data.status in ['Pending', 'Resolved']
+        && data.createdAt is timestamp;
+    }
+
+    function isValidPaymentSettings(data) {
+      return data.keys().hasAll(['momoNumber', 'momoName', 'airtelNumber', 'airtelName', 'updatedBy', 'updatedAt'])
+        && data.keys().hasOnly(['momoNumber', 'momoName', 'airtelNumber', 'airtelName', 'updatedBy', 'updatedAt'])
+        && data.momoNumber is string && data.momoNumber.size() <= 32
+        && data.momoName is string && data.momoName.size() <= 120
+        && data.airtelNumber is string && data.airtelNumber.size() <= 32
+        && data.airtelName is string && data.airtelName.size() <= 120
+        && data.updatedBy is string && data.updatedBy.size() <= 160
+        && data.updatedAt == request.time;
+    }
+
+    function isValidSecuritySettings(data) {
+      return data.keys().hasAll(['sessionEpoch', 'updatedBy', 'updatedAt'])
+        && data.keys().hasOnly(['sessionEpoch', 'updatedBy', 'updatedAt'])
+        && data.sessionEpoch is number && data.sessionEpoch >= 0
+        && data.updatedBy is string && data.updatedBy.size() <= 160
+        && data.updatedAt == request.time;
+    }
+
+    match /spices/{spiceId} {
+      allow get: if isValidId(spiceId);
+      allow list: if true;
+      allow create: if isValidId(spiceId) && isAnyAdmin() && isValidSpice(incoming()) && incoming().id == spiceId;
+      allow update: if isValidId(spiceId) && isAnyAdmin() && isValidSpice(incoming()) && incoming().id == existing().id;
+      allow delete: if isValidId(spiceId) && isAnyAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow get: if isValidId(orderId) && isMajorAdmin();
+      allow list: if isMajorAdmin();
+      allow create: if isValidId(orderId)
+        && isValidOrder(incoming())
+        && incoming().status == 'Pending'
+        && incoming().paymentConfirmed == false
+        && incoming().createdAt == request.time;
+      allow update: if isValidId(orderId)
+        && isMajorAdmin()
+        && isValidOrder(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().orderNumber == existing().orderNumber
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'paymentConfirmed', 'notes', 'updatedAt']);
+      allow delete: if isValidId(orderId) && isMajorAdmin();
+    }
+
+    match /inquiries/{inquiryId} {
+      allow get: if isValidId(inquiryId) && isMajorAdmin();
+      allow list: if isMajorAdmin();
+      allow create: if isValidId(inquiryId)
+        && isValidInquiry(incoming())
+        && incoming().status == 'New'
+        && incoming().createdAt == request.time;
+      allow update: if isValidId(inquiryId)
+        && isMajorAdmin()
+        && isValidInquiry(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+      allow delete: if isValidId(inquiryId) && isMajorAdmin();
+    }
+
+    match /adminAccounts/{accountId} {
+      allow get: if isValidId(accountId) && hasTrustedEmail() && (isMajorAdmin() || accountId == emailKey());
+      allow list: if isMajorAdmin();
+      allow create: if isValidId(accountId)
+        && isMajorAdmin()
+        && isValidAdminAccount(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isValidId(accountId)
+        && isValidAdminAccount(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().email == existing().email
+        && (
+          isMajorAdmin() ||
+          (hasTrustedEmail() && accountId == emailKey() && incoming().diff(existing()).affectedKeys().hasOnly(['mustChangePassword', 'updatedAt']))
+        );
+      allow delete: if isValidId(accountId) && isMajorAdmin();
+    }
+
+    match /passwordResetRequests/{requestId} {
+      allow get: if isValidId(requestId) && isMajorAdmin();
+      allow list: if isMajorAdmin();
+      allow create: if isValidId(requestId)
+        && isValidResetRequest(incoming())
+        && incoming().status == 'Pending'
+        && incoming().createdAt == request.time;
+      allow update: if isValidId(requestId)
+        && isMajorAdmin()
+        && isValidResetRequest(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+      allow delete: if isValidId(requestId) && isMajorAdmin();
+    }
+
+    match /settings/payments {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isMajorAdmin() && isValidPaymentSettings(incoming());
+      allow delete: if false;
+    }
+
+    match /settings/security {
+      allow get: if isAnyAdmin();
+      allow list: if false;
+      allow create, update: if isMajorAdmin() && isValidSecuritySettings(incoming());
+      allow delete: if false;
+    }
+  }
+}
