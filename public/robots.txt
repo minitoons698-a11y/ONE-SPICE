@@ -1,1 +1,4 @@
+User-agent: *
+Allow: /
 
+Sitemap: https://one-spice.onespiceug.workers.dev/sitemap.xml
