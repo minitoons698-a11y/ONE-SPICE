@@ -21,7 +21,7 @@ export function Header({ currentRoute, bagCount, onOpenBag }: HeaderProps) {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-[#F8F7F4]/95 backdrop-blur-md border-b border-[#171614]/10">
-      <div className="max-w-[1200px] mx-auto px-6 py-3.5 flex items-center justify-between gap-6">
+      <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between gap-6">
         {/* Zone 1: Single text element wordmark */}
         <a
           href="#/"

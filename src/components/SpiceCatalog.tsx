@@ -32,11 +32,12 @@ export function SpiceCatalog({
   const handleQuickAddClick = (e: React.MouseEvent, spice: Spice) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!spice.inStock) return;
     onQuickAdd(spice);
     setRecentlyAddedId(spice.id);
     setTimeout(() => {
       setRecentlyAddedId((prev) => (prev === spice.id ? null : prev));
-    }, 1200);
+    }, 1300);
   };
 
   return (
@@ -57,7 +58,7 @@ export function SpiceCatalog({
               One Spice Collection
             </h1>
             <p className="text-sm text-[#5C5852]">
-              Filter by culinary category or search in real time to open any spice and select a jar size.
+              Filter by culinary category or search in real time to open any spice and choose a weight.
             </p>
           </div>
           <p className="text-xs font-mono text-[#5C5852] tabular-nums">
@@ -71,24 +72,25 @@ export function SpiceCatalog({
             <div className="relative flex-1 max-w-xl">
               <Search
                 className="w-4 h-4 text-[#5C5852] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                strokeWidth={1.75}
                 aria-hidden="true"
               />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search spices by name or culinary category (e.g. Saffron, Heat & Smoke)..."
+                placeholder="Search spices by name or category (e.g. Saffron, Heat & Smoke)..."
                 aria-label="Search spices by name or culinary category"
-                className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-[#171614]/15 rounded-lg text-[#171614] placeholder:text-[#5C5852]/70 focus:outline-none focus:border-[#8C1D2F] transition-colors"
+                className="w-full pl-10 pr-10 py-2.5 text-sm bg-white border border-[#171614]/12 rounded-xl text-[#171614] placeholder:text-[#5C5852]/70 focus:outline-none focus:border-[#171614] transition-colors"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange('')}
                   aria-label="Clear search"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 inline-flex items-center justify-center rounded-md text-[#5C5852] hover:text-[#171614] hover:bg-[#EFECE6] transition-colors cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 inline-flex items-center justify-center rounded-lg text-[#5C5852] hover:text-[#171614] hover:bg-[#EFECE6] transition-colors cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3.5 h-3.5" strokeWidth={1.75} />
                 </button>
               )}
             </div>
@@ -101,11 +103,11 @@ export function SpiceCatalog({
                 id="spice-sort"
                 value={sortBy}
                 onChange={(e) => onSortChange(e.target.value as 'featured' | 'price-asc' | 'price-desc')}
-                className="px-3.5 py-2.5 text-xs font-medium bg-white border border-[#171614]/15 rounded-lg text-[#171614] focus:outline-none focus:border-[#8C1D2F] cursor-pointer"
+                className="px-3.5 py-2.5 text-xs font-medium bg-white border border-[#171614]/12 rounded-xl text-[#171614] focus:outline-none focus:border-[#171614] cursor-pointer"
               >
-                <option value="featured">Featured Spices</option>
-                <option value="price-asc">Price: Low to High (UGX)</option>
-                <option value="price-desc">Price: High to Low (UGX)</option>
+                <option value="featured">Featured spices</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
               </select>
             </div>
           </div>
@@ -114,7 +116,7 @@ export function SpiceCatalog({
           <div
             role="tablist"
             aria-label="Filter by culinary category"
-            className="flex flex-wrap items-center gap-1.5 p-1.5 bg-[#EFECE6] rounded-lg w-fit max-w-full"
+            className="flex flex-wrap items-center gap-1.5 p-1.5 bg-[#EFECE6] rounded-xl w-fit max-w-full"
           >
             {CATEGORIES.map((category) => {
               const isActive = selectedCategory === category;
@@ -125,7 +127,7 @@ export function SpiceCatalog({
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => onSelectCategory(category)}
-                  className={`relative px-3.5 py-2 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  className={`relative px-3.5 py-2 text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                     isActive ? 'text-[#171614]' : 'text-[#5C5852] hover:text-[#171614]'
                   }`}
                 >
@@ -133,7 +135,7 @@ export function SpiceCatalog({
                     <motion.span
                       layoutId="category-active-bg"
                       transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                      className="absolute inset-0 bg-white rounded-md shadow-xs"
+                      className="absolute inset-0 bg-white rounded-lg shadow-xs"
                       aria-hidden="true"
                     />
                   )}
@@ -144,9 +146,9 @@ export function SpiceCatalog({
           </div>
         </div>
 
-        {/* 3-Column Morphing Product Grid with Hyperlinked Cards */}
+        {/* 3-Column Morphing Product Grid with Consistent Uncluttered Imagery & Corner Quick-Add */}
         {spices.length === 0 ? (
-          <div className="py-16 px-6 text-center bg-[#EFECE6]/60 rounded-xl border border-[#171614]/8 space-y-4">
+          <div className="py-16 px-6 text-center bg-white rounded-2xl border border-[#171614]/8 space-y-4">
             <p className="font-display text-2xl text-[#171614]">
               No spices match &ldquo;{searchQuery}&rdquo;
             </p>
@@ -159,33 +161,32 @@ export function SpiceCatalog({
                 onSearchChange('');
                 onSelectCategory('All Spices');
               }}
-              className="px-5 py-2.5 text-xs font-semibold text-white bg-[#171614] hover:bg-[#8C1D2F] rounded-lg transition-colors cursor-pointer"
+              className="px-5 py-2.5 text-xs font-semibold text-white bg-[#171614] hover:bg-[#8C1D2F] rounded-xl transition-colors cursor-pointer"
             >
-              Reset Filters
+              Reset filters
             </button>
           </div>
         ) : (
           <motion.div
             layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             <AnimatePresence mode="popLayout">
               {spices.map((spice) => {
-                const basePrice = spice.weightTiers[0]?.price ?? 0;
-                const jarPrice = spice.weightTiers[1]?.price ?? basePrice;
+                const defaultTier = spice.weightTiers[1] ?? spice.weightTiers[0];
                 const isAdded = recentlyAddedId === spice.id;
 
                 return (
                   <motion.article
                     key={spice.id}
                     layout
-                    initial={{ opacity: 0, scale: 0.96 }}
+                    initial={{ opacity: 0, scale: 0.97 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                    className="group bg-white rounded-xl border border-[#171614]/8 overflow-hidden flex flex-col transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+                    className="group bg-white rounded-2xl border border-[#171614]/8 overflow-hidden flex flex-col transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <a href={`#/spice/${spice.id}`} className="block">
+                    <a href={`#/spice/${spice.id}`} className="relative block">
                       <motion.div
                         layoutId={`spice-image-${spice.id}`}
                         className="aspect-[4/3] w-full overflow-hidden bg-[#EFECE6]"
@@ -197,16 +198,40 @@ export function SpiceCatalog({
                           className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                         />
                       </motion.div>
+
+                      {spice.inStock && defaultTier && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleQuickAddClick(e, spice)}
+                          aria-label={`Quick add ${spice.name} (${defaultTier.label}) to bag`}
+                          className={`absolute bottom-3 right-3 w-10 h-10 rounded-full inline-flex items-center justify-center border shadow-sm transition-colors cursor-pointer ${
+                            isAdded
+                              ? 'bg-[#8C1D2F] text-white border-[#8C1D2F]'
+                              : 'bg-white/95 backdrop-blur-sm text-[#171614] border-[#171614]/12 hover:bg-[#171614] hover:text-white'
+                          }`}
+                        >
+                          {isAdded ? (
+                            <Check className="w-4 h-4" strokeWidth={2} />
+                          ) : (
+                            <Plus className="w-4 h-4" strokeWidth={1.75} />
+                          )}
+                        </button>
+                      )}
                     </a>
 
-                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                      <a href={`#/spice/${spice.id}`} className="block space-y-2">
-                        <div className="flex items-center gap-2 text-xs text-[#5C5852]">
-                          <span className="uppercase tracking-wider font-medium text-[#8C1D2F]">
-                            {spice.category}
+                    <a
+                      href={`#/spice/${spice.id}`}
+                      className="p-5 flex-1 flex flex-col justify-between space-y-4"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.08em] font-semibold">
+                          <span className="text-[#8C1D2F]">{spice.category}</span>
+                          <span className="text-[#171614]/25" aria-hidden="true">
+                            ·
                           </span>
-                          <span aria-hidden="true">·</span>
-                          <span>{spice.inStock ? 'In Stock' : 'Restocking'}</span>
+                          <span className="text-[#5C5852]">
+                            {spice.inStock ? 'In stock' : 'Restocking'}
+                          </span>
                         </div>
 
                         <motion.h2
@@ -219,42 +244,17 @@ export function SpiceCatalog({
                         <p className="text-sm text-[#5C5852] line-clamp-2 leading-relaxed">
                           {spice.shortDescription}
                         </p>
-                      </a>
-
-                      <div className="pt-4 border-t border-[#171614]/8 flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-[15px] font-semibold text-[#171614] tabular-nums">
-                            From {formatUGX(basePrice)}
-                          </p>
-                          <p className="text-xs text-[#5C5852] tabular-nums">
-                            {spice.weightTiers[1]?.label ?? spice.weightTiers[0]?.label} · {formatUGX(jarPrice)}
-                          </p>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={(e) => handleQuickAddClick(e, spice)}
-                          aria-label={`Quick add ${spice.name} to bag`}
-                          className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                            isAdded
-                              ? 'bg-[#8C1D2F] text-white border-[#8C1D2F]'
-                              : 'bg-[#F8F7F4] text-[#171614] border-[#171614]/15 hover:border-[#171614]/40'
-                          }`}
-                        >
-                          {isAdded ? (
-                            <>
-                              <Check className="w-3.5 h-3.5" />
-                              <span>Added</span>
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="w-3.5 h-3.5" />
-                              <span>Add Jar</span>
-                            </>
-                          )}
-                        </button>
                       </div>
-                    </div>
+
+                      <div className="pt-3.5 border-t border-[#171614]/8 flex items-baseline justify-between gap-3">
+                        <span className="text-base font-semibold text-[#171614] tabular-nums">
+                          {formatUGX(defaultTier?.price ?? 0)}
+                        </span>
+                        <span className="text-xs text-[#5C5852] truncate">
+                          {defaultTier?.label}
+                        </span>
+                      </div>
+                    </a>
                   </motion.article>
                 );
               })}

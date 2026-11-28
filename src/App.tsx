@@ -230,7 +230,7 @@ export default function App() {
             onOpenBag={() => setIsBagOpen(true)}
           />
 
-          <main className="flex-1 pt-[68px]">
+          <main className="flex-1 pt-16">
             {routeState.route === 'home' && (
               <motion.div
                 key="home-page"
@@ -238,7 +238,7 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               >
-                <HomePage spices={allSpices} />
+                <HomePage spices={allSpices} onQuickAdd={handleQuickAdd} />
               </motion.div>
             )}
 

@@ -1,14 +1,28 @@
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, ArrowUpRight, MapPin, ShoppingBag } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, MapPin, Plus, ShoppingBag } from 'lucide-react';
 import { HERO_IMAGE, SHOP_INFO, Spice, formatUGX } from '../data/spices';
 import { SpiceImage } from './SpiceImage';
 
 interface HomePageProps {
   spices: Spice[];
+  onQuickAdd: (spice: Spice) => void;
 }
 
-export function HomePage({ spices }: HomePageProps) {
+export function HomePage({ spices, onQuickAdd }: HomePageProps) {
   const featured = spices.slice(0, 3);
+  const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
+
+  const handleQuickAddClick = (e: React.MouseEvent, spice: Spice) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!spice.inStock) return;
+    onQuickAdd(spice);
+    setRecentlyAddedId(spice.id);
+    setTimeout(() => {
+      setRecentlyAddedId((prev) => (prev === spice.id ? null : prev));
+    }, 1300);
+  };
 
   return (
     <div>
@@ -17,7 +31,7 @@ export function HomePage({ spices }: HomePageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
           <div className="lg:col-span-6 flex flex-col justify-between py-2 space-y-8">
             <div className="space-y-5">
-              <p className="text-xs font-medium tracking-wide uppercase text-[#8C1D2F]">
+              <p className="text-[11px] font-semibold tracking-[0.08em] uppercase text-[#8C1D2F]">
                 One Spice · Curated by {SHOP_INFO.tiktokHandle}
               </p>
               <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-medium leading-[1.08] tracking-tight text-[#171614] text-balance">
@@ -28,25 +42,25 @@ export function HomePage({ spices }: HomePageProps) {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href="#/spices"
-                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-[#8C1D2F] hover:bg-[#731625] rounded-lg transition-colors whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-[#8C1D2F] hover:bg-[#731625] rounded-xl transition-colors whitespace-nowrap shrink-0"
               >
-                <span>Browse All Spices</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Browse all spices</span>
+                <ArrowRight className="w-4 h-4" strokeWidth={1.75} />
               </a>
               <a
                 href="#/contact"
-                className="inline-flex items-center gap-2 px-5 py-3 text-sm font-medium text-[#171614] bg-[#EFECE6] hover:bg-[#E4DFD5] rounded-lg transition-colors whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-2 px-5 py-3 text-sm font-medium text-[#171614] bg-[#EFECE6] hover:bg-[#E4DFD5] rounded-xl transition-colors whitespace-nowrap shrink-0"
               >
-                <span>Visit &amp; Contact</span>
+                <span>Visit &amp; contact</span>
               </a>
             </div>
           </div>
 
           <div className="lg:col-span-6">
-            <div className="relative h-72 sm:h-96 lg:h-full min-h-[340px] rounded-xl overflow-hidden bg-[#EFECE6] border border-[#171614]/8">
+            <div className="relative h-72 sm:h-96 lg:h-full min-h-[340px] rounded-2xl overflow-hidden bg-[#EFECE6] border border-[#171614]/8">
               <SpiceImage
                 src={HERO_IMAGE}
                 alt="One Spice basalt bowls and brass tasting spoons on honed limestone"
@@ -58,27 +72,27 @@ export function HomePage({ spices }: HomePageProps) {
         </div>
 
         {/* Full-Width 4-Column Shop Spec Strip */}
-        <div className="mt-10 pt-8 border-t border-[#171614]/10 grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mt-10 pt-8 border-t border-[#171614]/8 grid grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <p className="font-mono text-xs text-[#5C5852] tabular-nums">01 · Active Shelf</p>
+            <p className="font-mono text-xs text-[#5C5852] tabular-nums">01 · Active shelf</p>
             <p className="mt-1 text-sm font-semibold text-[#171614] tabular-nums">
-              {spices.length} Fresh Spices
+              {spices.length} Fresh spices
             </p>
           </div>
           <div>
-            <p className="font-mono text-xs text-[#5C5852]">02 · Payment Options</p>
+            <p className="font-mono text-xs text-[#5C5852]">02 · Payment options</p>
             <p className="mt-1 text-sm font-semibold text-[#171614]">
               MoMo, Airtel Pay &amp; Cash
             </p>
           </div>
           <div>
-            <p className="font-mono text-xs text-[#5C5852]">03 · Milling Counter</p>
+            <p className="font-mono text-xs text-[#5C5852]">03 · Milling counter</p>
             <p className="mt-1 text-sm font-semibold text-[#171614]">
-              Stone-Ground Daily to Order
+              Stone-ground daily to order
             </p>
           </div>
           <div>
-            <p className="font-mono text-xs text-[#5C5852]">04 · Shop Location</p>
+            <p className="font-mono text-xs text-[#5C5852]">04 · Shop location</p>
             <a
               href={SHOP_INFO.mapsUrl}
               target="_blank"
@@ -92,12 +106,12 @@ export function HomePage({ spices }: HomePageProps) {
       </section>
 
       {/* Featured Spices Preview */}
-      <section className="py-14 lg:py-16 border-t border-[#171614]/10">
+      <section className="py-14 lg:py-16 border-t border-[#171614]/8">
         <div className="max-w-[1200px] mx-auto px-6 space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-1.5">
               <h2 className="font-display text-3xl font-medium text-[#171614]">
-                Featured Spices
+                Featured spices
               </h2>
               <p className="text-sm text-[#5C5852]">
                 Explore signature jars on our shelf, or open the full catalog with live search and category filters.
@@ -107,36 +121,64 @@ export function HomePage({ spices }: HomePageProps) {
               href="#/spices"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#8C1D2F] hover:text-[#731625] underline underline-offset-4 whitespace-nowrap shrink-0"
             >
-              <span>View Full Spice Shelf ({spices.length})</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>View full shelf ({spices.length})</span>
+              <ArrowRight className="w-4 h-4" strokeWidth={1.75} />
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {featured.map((spice) => {
-              const basePrice = spice.weightTiers[0]?.price ?? 0;
+              const defaultTier = spice.weightTiers[1] ?? spice.weightTiers[0];
+              const isAdded = recentlyAddedId === spice.id;
+
               return (
                 <a
                   key={spice.id}
                   href={`#/spice/${spice.id}`}
-                  className="group bg-white rounded-xl border border-[#171614]/8 overflow-hidden flex flex-col transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                  className="group bg-white rounded-2xl border border-[#171614]/8 overflow-hidden flex flex-col transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md"
                 >
-                  <motion.div
-                    layoutId={`spice-image-${spice.id}`}
-                    className="aspect-[4/3] w-full overflow-hidden bg-[#EFECE6]"
-                  >
-                    <SpiceImage
-                      src={spice.image}
-                      alt={spice.imageAlt}
-                      title={spice.name}
-                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                    />
-                  </motion.div>
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2 text-xs text-[#5C5852]">
-                        <span className="uppercase tracking-wider font-medium text-[#8C1D2F]">
-                          {spice.category}
+                  <div className="relative">
+                    <motion.div
+                      layoutId={`spice-image-${spice.id}`}
+                      className="aspect-[4/3] w-full overflow-hidden bg-[#EFECE6]"
+                    >
+                      <SpiceImage
+                        src={spice.image}
+                        alt={spice.imageAlt}
+                        title={spice.name}
+                        className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                      />
+                    </motion.div>
+
+                    {spice.inStock && defaultTier && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleQuickAddClick(e, spice)}
+                        aria-label={`Quick add ${spice.name} (${defaultTier.label}) to bag`}
+                        className={`absolute bottom-3 right-3 w-10 h-10 rounded-full inline-flex items-center justify-center border shadow-sm transition-colors cursor-pointer ${
+                          isAdded
+                            ? 'bg-[#8C1D2F] text-white border-[#8C1D2F]'
+                            : 'bg-white/95 backdrop-blur-sm text-[#171614] border-[#171614]/12 hover:bg-[#171614] hover:text-white'
+                        }`}
+                      >
+                        {isAdded ? (
+                          <Check className="w-4 h-4" strokeWidth={2} />
+                        ) : (
+                          <Plus className="w-4 h-4" strokeWidth={1.75} />
+                        )}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.08em] font-semibold">
+                        <span className="text-[#8C1D2F]">{spice.category}</span>
+                        <span className="text-[#171614]/25" aria-hidden="true">
+                          ·
+                        </span>
+                        <span className="text-[#5C5852]">
+                          {spice.inStock ? 'In stock' : 'Restocking'}
                         </span>
                       </div>
                       <motion.h3
@@ -149,12 +191,12 @@ export function HomePage({ spices }: HomePageProps) {
                         {spice.shortDescription}
                       </p>
                     </div>
-                    <div className="pt-3 border-t border-[#171614]/8 flex items-center justify-between text-sm">
-                      <span className="font-semibold text-[#171614] tabular-nums">
-                        From {formatUGX(basePrice)}
+                    <div className="pt-3.5 border-t border-[#171614]/8 flex items-baseline justify-between gap-3">
+                      <span className="text-base font-semibold text-[#171614] tabular-nums">
+                        {formatUGX(defaultTier?.price ?? 0)}
                       </span>
-                      <span className="text-xs font-medium text-[#8C1D2F] group-hover:underline underline-offset-4">
-                        View Spice
+                      <span className="text-xs text-[#5C5852] truncate">
+                        {defaultTier?.label}
                       </span>
                     </div>
                   </div>
@@ -166,21 +208,21 @@ export function HomePage({ spices }: HomePageProps) {
       </section>
 
       {/* Hyperlinked Navigation Strip to Spices & Contact */}
-      <section className="py-14 bg-[#EFECE6]/70 border-t border-[#171614]/10">
-        <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <section className="py-14 bg-[#EFECE6]/70 border-t border-[#171614]/8">
+        <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <a
             href="#/spices"
-            className="group p-8 bg-white rounded-xl border border-[#171614]/8 space-y-3 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
+            className="group p-8 bg-white rounded-2xl border border-[#171614]/8 space-y-3 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
           >
             <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#8C1D2F]">
-                <ShoppingBag className="w-4 h-4" />
-                <span>Live Spice Catalog</span>
+              <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8C1D2F]">
+                <ShoppingBag className="w-4 h-4" strokeWidth={1.75} />
+                <span>Live spice catalog</span>
               </div>
-              <ArrowRight className="w-4 h-4 text-[#5C5852] group-hover:text-[#171614] transition-colors" />
+              <ArrowRight className="w-4 h-4 text-[#5C5852] group-hover:text-[#171614] transition-colors" strokeWidth={1.75} />
             </div>
             <h3 className="font-display text-2xl font-medium text-[#171614]">
-              Browse All Spices &amp; Jar Sizes
+              Browse all spices &amp; weights
             </h3>
             <p className="text-sm text-[#5C5852] leading-relaxed">
               Search spices in real time, compare weights and UGX pricing, and order with MTN MoMo, Airtel Pay, or Cash on Delivery.
@@ -189,14 +231,14 @@ export function HomePage({ spices }: HomePageProps) {
 
           <a
             href="#/contact"
-            className="group p-8 bg-white rounded-xl border border-[#171614]/8 space-y-3 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
+            className="group p-8 bg-white rounded-2xl border border-[#171614]/8 space-y-3 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
           >
             <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#8C1D2F]">
-                <MapPin className="w-4 h-4" />
-                <span>Shop Location &amp; TikTok</span>
+              <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8C1D2F]">
+                <MapPin className="w-4 h-4" strokeWidth={1.75} />
+                <span>Shop location &amp; TikTok</span>
               </div>
-              <ArrowUpRight className="w-4 h-4 text-[#5C5852] group-hover:text-[#171614] transition-colors" />
+              <ArrowUpRight className="w-4 h-4 text-[#5C5852] group-hover:text-[#171614] transition-colors" strokeWidth={1.75} />
             </div>
             <h3 className="font-display text-2xl font-medium text-[#171614]">
               Visit {SHOP_INFO.addressLine1}
