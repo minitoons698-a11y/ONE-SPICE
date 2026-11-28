@@ -57,7 +57,7 @@ export function SpiceCatalog({
               One Spice Collection
             </h1>
             <p className="text-sm text-[#5C5852]">
-              Filter by culinary category or search in real time to open any spice’s full tasting and origin profile.
+              Filter by culinary category or search in real time to open any spice and select a jar size.
             </p>
           </div>
           <p className="text-xs font-mono text-[#5C5852] tabular-nums">
@@ -103,7 +103,7 @@ export function SpiceCatalog({
                 onChange={(e) => onSortChange(e.target.value as 'featured' | 'price-asc' | 'price-desc')}
                 className="px-3.5 py-2.5 text-xs font-medium bg-white border border-[#171614]/15 rounded-lg text-[#171614] focus:outline-none focus:border-[#8C1D2F] cursor-pointer"
               >
-                <option value="featured">Featured Harvests</option>
+                <option value="featured">Featured Spices</option>
                 <option value="price-asc">Price: Low to High (UGX)</option>
                 <option value="price-desc">Price: High to Low (UGX)</option>
               </select>
@@ -206,7 +206,7 @@ export function SpiceCatalog({
                             {spice.category}
                           </span>
                           <span aria-hidden="true">·</span>
-                          <span>{spice.origin.country}</span>
+                          <span>{spice.inStock ? 'In Stock' : 'Restocking'}</span>
                         </div>
 
                         <motion.h2

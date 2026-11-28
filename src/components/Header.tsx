@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { Menu, ShoppingBag, X } from 'lucide-react';
 import { SHOP_INFO } from '../data/spices';
 
-export type AppRoute = 'home' | 'spices' | 'spice' | 'origins' | 'contact' | 'admin';
+export type AppRoute = 'home' | 'spices' | 'spice' | 'contact' | 'admin';
 
 interface HeaderProps {
   currentRoute: AppRoute;
@@ -36,11 +36,11 @@ export function Header({ currentRoute, bagCount, onOpenBag }: HeaderProps) {
           aria-label="Primary navigation"
           className="hidden md:flex items-center gap-7 text-sm font-medium"
         >
+          <a href="#/" className={linkClass(currentRoute === 'home')}>
+            Home
+          </a>
           <a href="#/spices" className={linkClass(currentRoute === 'spices' || currentRoute === 'spice')}>
             Spices
-          </a>
-          <a href="#/origins" className={linkClass(currentRoute === 'origins')}>
-            Origins
           </a>
           <a href="#/contact" className={linkClass(currentRoute === 'contact')}>
             Visit &amp; Contact
@@ -110,15 +110,6 @@ export function Header({ currentRoute, bagCount, onOpenBag }: HeaderProps) {
               }`}
             >
               Spices
-            </a>
-            <a
-              href="#/origins"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`block py-2.5 text-sm font-medium border-b border-[#171614]/8 ${
-                currentRoute === 'origins' ? 'text-[#8C1D2F] font-semibold' : 'text-[#171614]'
-              }`}
-            >
-              Origins
             </a>
             <a
               href="#/contact"

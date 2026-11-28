@@ -85,7 +85,7 @@ type AdminTab =
   | 'inquiries'
   | 'account';
 
-type LoginMode = 'signin' | 'activate' | 'recover';
+type LoginMode = 'signin' | 'recover';
 
 const ORDER_STATUSES: OrderStatus[] = ['Pending', 'Preparing', 'Ready', 'Completed', 'Cancelled'];
 
@@ -147,40 +147,16 @@ function createEmptySpiceForm(): Spice {
     name: '',
     botanicalName: '',
     category: 'Floral & Rare',
-    grade: 'Single-Origin Reserve',
+    grade: 'Premium Reserve',
     image: '',
     imageAlt: '',
     shortDescription: '',
     inStock: true,
-    lotCode: `Harvest Lot OS-${new Date().getFullYear().toString().slice(-2)}`,
     weightTiers: [
       { label: '50g Pouch', grams: 50, price: 35000 },
       { label: '100g Apothecary Jar', grams: 100, price: 65000 },
       { label: '250g Pantry Tin', grams: 250, price: 145000 },
     ],
-    tastingNotes: {
-      summary: '',
-      aroma: '',
-      palate: '',
-      finish: '',
-      sensory: { warmth: 3, aroma: 4, pungency: 2, sweetness: 3 },
-    },
-    culinaryUses: [
-      {
-        dish: '',
-        pairing: '',
-        technique: '',
-      },
-    ],
-    origin: {
-      country: '',
-      region: '',
-      coordinates: '',
-      elevation: '',
-      harvestSeason: '',
-      curingMethod: '',
-      story: '',
-    },
     pairings: [],
   };
 }
@@ -189,9 +165,9 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
   const [user, setUser] = useState<User | null>(auth.currentUser);
   const [authReady, setAuthReady] = useState(false);
 
-  // Login / Activation / Recovery state
+  // Login / Recovery state
   const [loginMode, setLoginMode] = useState<LoginMode>('signin');
-  const [loginEmail, setLoginEmail] = useState(PRIMARY_MAJOR_ADMIN_EMAIL);
+  const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -530,43 +506,10 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
         );
       } else if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
         setAuthError(
-          'Invalid credentials or account not yet activated. If this is geraldjabin698@gmail.com on first setup, switch to "First-Time Activation" below.'
+          'Invalid email or password. Use Forgot Password if you need to reset your password.'
         );
       } else {
         setAuthError(err instanceof Error ? err.message : 'Unable to sign in.');
-      }
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const handleFirstTimeActivate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError(null);
-    setAuthNotice(null);
-    setNeedsEmailProviderSetup(false);
-    const trimmedEmail = loginEmail.trim().toLowerCase();
-    if (!isBootstrappedMajorAdminEmail(trimmedEmail)) {
-      setAuthError(
-        'Only an existing Major Admin can create new admin accounts. Ask geraldjabin698@gmail.com to add your Gmail.'
-      );
-      return;
-    }
-    setAuthLoading(true);
-    try {
-      await createUserWithEmailAndPassword(auth, trimmedEmail, loginPassword);
-      setLoginPassword('');
-    } catch (err: unknown) {
-      const code = (err as { code?: string })?.code ?? '';
-      if (code === 'auth/operation-not-allowed') {
-        setNeedsEmailProviderSetup(true);
-        setAuthError(
-          'Email/Password sign-in must be enabled in Firebase Authentication Providers before activating password login. You can still sign in immediately with Google below.'
-        );
-      } else if (code === 'auth/email-already-in-use') {
-        setAuthError('This owner account is already activated. Use Sign In above or Forgot Password.');
-      } else {
-        setAuthError(err instanceof Error ? err.message : 'Activation failed.');
       }
     } finally {
       setAuthLoading(false);
@@ -915,14 +858,13 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
       const payload: Spice & { updatedAt: unknown } = {
         id: finalId,
         name: editingSpice.name.trim().slice(0, 120),
-        botanicalName: editingSpice.botanicalName.trim().slice(0, 120),
+        botanicalName: (editingSpice.botanicalName ?? '').trim().slice(0, 120),
         category: editingSpice.category,
-        grade: editingSpice.grade.trim().slice(0, 120),
+        grade: (editingSpice.grade ?? '').trim().slice(0, 120),
         image: editingSpice.image.trim(),
         imageAlt: (editingSpice.imageAlt || editingSpice.name).trim().slice(0, 240),
         shortDescription: editingSpice.shortDescription.trim().slice(0, 360),
         inStock: Boolean(editingSpice.inStock),
-        lotCode: editingSpice.lotCode.trim().slice(0, 64),
         weightTiers: editingSpice.weightTiers
           .filter((t) => t.label.trim())
           .slice(0, 5)
@@ -931,48 +873,9 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
             grams: Number(t.grams) || 50,
             price: Number(t.price) || 10000,
           })),
-        tastingNotes: {
-          summary: editingSpice.tastingNotes.summary.trim().slice(0, 600),
-          aroma: editingSpice.tastingNotes.aroma.trim().slice(0, 240),
-          palate: editingSpice.tastingNotes.palate.trim().slice(0, 240),
-          finish: editingSpice.tastingNotes.finish.trim().slice(0, 240),
-          sensory: {
-            warmth: Number(editingSpice.tastingNotes.sensory.warmth) || 3,
-            aroma: Number(editingSpice.tastingNotes.sensory.aroma) || 4,
-            pungency: Number(editingSpice.tastingNotes.sensory.pungency) || 2,
-            sweetness: Number(editingSpice.tastingNotes.sensory.sweetness) || 3,
-          },
-        },
-        culinaryUses: editingSpice.culinaryUses
-          .filter((u) => u.dish.trim())
-          .slice(0, 6)
-          .map((u) => ({
-            dish: u.dish.trim(),
-            pairing: u.pairing.trim(),
-            technique: u.technique.trim(),
-          })),
-        origin: {
-          country: editingSpice.origin.country.trim().slice(0, 80),
-          region: editingSpice.origin.region.trim().slice(0, 120),
-          coordinates: editingSpice.origin.coordinates.trim().slice(0, 64),
-          elevation: editingSpice.origin.elevation.trim().slice(0, 40),
-          harvestSeason: editingSpice.origin.harvestSeason.trim().slice(0, 100),
-          curingMethod: editingSpice.origin.curingMethod.trim().slice(0, 160),
-          story: editingSpice.origin.story.trim().slice(0, 600),
-        },
-        pairings: editingSpice.pairings.slice(0, 6),
+        pairings: (editingSpice.pairings ?? []).slice(0, 6),
         updatedAt: serverTimestamp(),
       };
-
-      if (payload.culinaryUses.length === 0) {
-        payload.culinaryUses = [
-          {
-            dish: 'Signature Finishing Sprinkle',
-            pairing: 'Roasted vegetables, olive oil, flaky salt',
-            technique: 'Finish warm dishes right before serving to preserve volatile aromatics.',
-          },
-        ];
-      }
 
       await setDoc(doc(db, 'spices', finalId), payload);
       setSpiceFeedback(`Saved "${payload.name}" to One Spice live catalog.`);
@@ -1045,7 +948,7 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
           </div>
 
           {/* Login Mode Switcher */}
-          <div className="grid grid-cols-3 gap-1 p-1 bg-[#EFECE6] rounded-lg text-xs font-medium">
+          <div className="grid grid-cols-2 gap-1 p-1 bg-[#EFECE6] rounded-lg text-xs font-medium">
             <button
               type="button"
               onClick={() => {
@@ -1058,19 +961,6 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
               }`}
             >
               Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setLoginMode('activate');
-                setAuthError(null);
-                setAuthNotice(null);
-              }}
-              className={`py-2 rounded-md transition-colors cursor-pointer ${
-                loginMode === 'activate' ? 'bg-white text-[#171614] shadow-xs' : 'text-[#5C5852]'
-              }`}
-            >
-              First-Time Setup
             </button>
             <button
               type="button"
@@ -1098,7 +988,7 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
                   required
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
-                  placeholder="geraldjabin698@gmail.com"
+                  placeholder="admin@gmail.com"
                   className="w-full px-3.5 py-2.5 text-sm bg-[#F8F7F4] border border-[#171614]/15 rounded-lg focus:outline-none focus:border-[#8C1D2F]"
                 />
               </div>
@@ -1121,47 +1011,6 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
                 className="w-full py-2.5 px-5 text-sm font-semibold text-white bg-[#8C1D2F] hover:bg-[#731625] rounded-lg transition-colors cursor-pointer disabled:opacity-60"
               >
                 {authLoading ? 'Signing In...' : 'Sign In with Gmail & Password'}
-              </button>
-            </form>
-          )}
-
-          {loginMode === 'activate' && (
-            <form onSubmit={handleFirstTimeActivate} className="space-y-4">
-              <p className="text-xs text-[#5C5852] leading-relaxed">
-                First time signing in as Major Admin (<span className="font-mono">{PRIMARY_MAJOR_ADMIN_EMAIL}</span>)? Activate your password login here (e.g., <span className="font-mono">1234567890</span>). You can change it anytime inside the Admin Panel.
-              </p>
-              <div>
-                <label className="block text-xs font-medium text-[#171614] mb-1">
-                  Owner Gmail
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm bg-[#F8F7F4] border border-[#171614]/15 rounded-lg focus:outline-none focus:border-[#8C1D2F]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-[#171614] mb-1">
-                  Initial Password (min 6 chars)
-                </label>
-                <input
-                  type="password"
-                  required
-                  minLength={6}
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="Enter 1234567890 or your chosen password"
-                  className="w-full px-3.5 py-2.5 text-sm bg-[#F8F7F4] border border-[#171614]/15 rounded-lg focus:outline-none focus:border-[#8C1D2F]"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={authLoading}
-                className="w-full py-2.5 px-5 text-sm font-semibold text-white bg-[#8C1D2F] hover:bg-[#731625] rounded-lg transition-colors cursor-pointer disabled:opacity-60"
-              >
-                {authLoading ? 'Activating...' : 'Activate Major Admin Account'}
               </button>
             </form>
           )}
@@ -1393,21 +1242,6 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
               </button>
             </div>
           </div>
-
-          {ownAccount?.mustChangePassword && (
-            <div className="p-4 rounded-xl bg-[#8C1D2F]/8 border border-[#8C1D2F]/25 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <span className="text-[#171614] font-medium">
-                You are using an admin-assigned initial password. Please update it in the Password tab.
-              </span>
-              <button
-                type="button"
-                onClick={() => setActiveTab('account')}
-                className="px-3 py-1.5 font-semibold text-white bg-[#8C1D2F] rounded-md cursor-pointer"
-              >
-                Change Password
-              </button>
-            </div>
-          )}
 
           {/* TAB: STATISTICS & CASH INFLOW (MAJOR ADMIN ONLY) */}
           {activeTab === 'stats' && isMajorAdmin && (
@@ -1833,7 +1667,7 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
                       </div>
                       <div>
                         <label className="block text-xs font-medium text-[#171614] mb-1">
-                          Grade &amp; Lot Code
+                          Grade
                         </label>
                         <input
                           type="text"
@@ -1924,213 +1758,6 @@ export function AdminPage({ liveSpices, paymentSettings }: AdminPageProps) {
                           </div>
                         </div>
                       ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-[#171614]/10 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <h4 className="text-xs font-semibold uppercase tracking-wider text-[#5C5852]">
-                        Tasting Notes
-                      </h4>
-                      <textarea
-                        rows={2}
-                        required
-                        value={editingSpice.tastingNotes.summary}
-                        onChange={(e) =>
-                          setEditingSpice({
-                            ...editingSpice,
-                            tastingNotes: { ...editingSpice.tastingNotes, summary: e.target.value },
-                          })
-                        }
-                        placeholder="Overall tasting profile summary..."
-                        className="w-full px-3 py-2 text-sm bg-[#F8F7F4] border border-[#171614]/15 rounded-lg resize-none"
-                      />
-                      <input
-                        type="text"
-                        required
-                        value={editingSpice.tastingNotes.aroma}
-                        onChange={(e) =>
-                          setEditingSpice({
-                            ...editingSpice,
-                            tastingNotes: { ...editingSpice.tastingNotes, aroma: e.target.value },
-                          })
-                        }
-                        placeholder="Primary Aroma"
-                        className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                      />
-                      <input
-                        type="text"
-                        required
-                        value={editingSpice.tastingNotes.palate}
-                        onChange={(e) =>
-                          setEditingSpice({
-                            ...editingSpice,
-                            tastingNotes: { ...editingSpice.tastingNotes, palate: e.target.value },
-                          })
-                        }
-                        placeholder="Palate Notes"
-                        className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                      />
-                      <input
-                        type="text"
-                        required
-                        value={editingSpice.tastingNotes.finish}
-                        onChange={(e) =>
-                          setEditingSpice({
-                            ...editingSpice,
-                            tastingNotes: { ...editingSpice.tastingNotes, finish: e.target.value },
-                          })
-                        }
-                        placeholder="Finish"
-                        className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <h4 className="text-xs font-semibold uppercase tracking-wider text-[#5C5852]">
-                        Origin &amp; Harvest
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          required
-                          value={editingSpice.origin.country}
-                          onChange={(e) =>
-                            setEditingSpice({
-                              ...editingSpice,
-                              origin: { ...editingSpice.origin, country: e.target.value },
-                            })
-                          }
-                          placeholder="Country"
-                          className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                        />
-                        <input
-                          type="text"
-                          required
-                          value={editingSpice.origin.region}
-                          onChange={(e) =>
-                            setEditingSpice({
-                              ...editingSpice,
-                              origin: { ...editingSpice.origin, region: e.target.value },
-                            })
-                          }
-                          placeholder="Micro-Region"
-                          className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                        />
-                        <input
-                          type="text"
-                          value={editingSpice.origin.coordinates}
-                          onChange={(e) =>
-                            setEditingSpice({
-                              ...editingSpice,
-                              origin: { ...editingSpice.origin, coordinates: e.target.value },
-                            })
-                          }
-                          placeholder="Coordinates"
-                          className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                        />
-                        <input
-                          type="text"
-                          value={editingSpice.origin.elevation}
-                          onChange={(e) =>
-                            setEditingSpice({
-                              ...editingSpice,
-                              origin: { ...editingSpice.origin, elevation: e.target.value },
-                            })
-                          }
-                          placeholder="Elevation"
-                          className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                        />
-                      </div>
-                      <input
-                        type="text"
-                        value={editingSpice.origin.harvestSeason}
-                        onChange={(e) =>
-                          setEditingSpice({
-                            ...editingSpice,
-                            origin: { ...editingSpice.origin, harvestSeason: e.target.value },
-                          })
-                        }
-                        placeholder="Harvest Window"
-                        className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                      />
-                      <input
-                        type="text"
-                        value={editingSpice.origin.curingMethod}
-                        onChange={(e) =>
-                          setEditingSpice({
-                            ...editingSpice,
-                            origin: { ...editingSpice.origin, curingMethod: e.target.value },
-                          })
-                        }
-                        placeholder="Curing Method"
-                        className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                      />
-                      <textarea
-                        rows={2}
-                        value={editingSpice.origin.story}
-                        onChange={(e) =>
-                          setEditingSpice({
-                            ...editingSpice,
-                            origin: { ...editingSpice.origin, story: e.target.value },
-                          })
-                        }
-                        placeholder="Provenance story..."
-                        className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg resize-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-[#171614]/10 space-y-3">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-[#5C5852]">
-                      Suggested Culinary Use
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <input
-                        type="text"
-                        required
-                        value={editingSpice.culinaryUses[0]?.dish ?? ''}
-                        onChange={(e) => {
-                          const nextUses = [...editingSpice.culinaryUses];
-                          nextUses[0] = {
-                            ...(nextUses[0] || { dish: '', pairing: '', technique: '' }),
-                            dish: e.target.value,
-                          };
-                          setEditingSpice({ ...editingSpice, culinaryUses: nextUses });
-                        }}
-                        placeholder="Dish Name"
-                        className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                      />
-                      <input
-                        type="text"
-                        required
-                        value={editingSpice.culinaryUses[0]?.pairing ?? ''}
-                        onChange={(e) => {
-                          const nextUses = [...editingSpice.culinaryUses];
-                          nextUses[0] = {
-                            ...(nextUses[0] || { dish: '', pairing: '', technique: '' }),
-                            pairing: e.target.value,
-                          };
-                          setEditingSpice({ ...editingSpice, culinaryUses: nextUses });
-                        }}
-                        placeholder="Key Pairings"
-                        className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                      />
-                      <input
-                        type="text"
-                        required
-                        value={editingSpice.culinaryUses[0]?.technique ?? ''}
-                        onChange={(e) => {
-                          const nextUses = [...editingSpice.culinaryUses];
-                          nextUses[0] = {
-                            ...(nextUses[0] || { dish: '', pairing: '', technique: '' }),
-                            technique: e.target.value,
-                          };
-                          setEditingSpice({ ...editingSpice, culinaryUses: nextUses });
-                        }}
-                        placeholder="Preparation Tip"
-                        className="w-full px-3 py-2 text-xs bg-[#F8F7F4] border border-[#171614]/15 rounded-lg"
-                      />
                     </div>
                   </div>
 

@@ -24,8 +24,7 @@
       },
       "required": [
         "id", "name", "botanicalName", "category", "grade", "image", "imageAlt",
-        "shortDescription", "inStock", "lotCode", "weightTiers", "tastingNotes",
-        "culinaryUses", "origin", "pairings", "updatedAt"
+        "shortDescription", "inStock", "weightTiers", "pairings", "updatedAt"
       ]
     },
     "Order": {

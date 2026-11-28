@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowRight, ArrowUpRight, Compass, MapPin } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, MapPin, ShoppingBag } from 'lucide-react';
 import { HERO_IMAGE, SHOP_INFO, Spice, formatUGX } from '../data/spices';
 import { SpiceImage } from './SpiceImage';
 
@@ -21,10 +21,10 @@ export function HomePage({ spices }: HomePageProps) {
                 One Spice · Curated by {SHOP_INFO.tiktokHandle}
               </p>
               <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-medium leading-[1.08] tracking-tight text-[#171614] text-balance">
-                Whole harvests, stone-milled at peak aroma
+                Whole spices, stone-milled at peak aroma
               </h1>
               <p className="text-base sm:text-lg text-[#5C5852] leading-relaxed max-w-xl">
-                Welcome to One Spice. Small-lot single-origin spices sourced directly from heirloom growers, profiled with tasting notes, harvest coordinates, and culinary pairings.
+                Welcome to One Spice. Fresh, fragrant whole and ground spices packed in small batches with live UGX pricing, pickup in Kampala, and online delivery.
               </p>
             </div>
 
@@ -62,7 +62,7 @@ export function HomePage({ spices }: HomePageProps) {
           <div>
             <p className="font-mono text-xs text-[#5C5852] tabular-nums">01 · Active Shelf</p>
             <p className="mt-1 text-sm font-semibold text-[#171614] tabular-nums">
-              {spices.length} Single-Origin Spices
+              {spices.length} Fresh Spices
             </p>
           </div>
           <div>
@@ -91,16 +91,16 @@ export function HomePage({ spices }: HomePageProps) {
         </div>
       </section>
 
-      {/* Featured Harvests Preview */}
+      {/* Featured Spices Preview */}
       <section className="py-14 lg:py-16 border-t border-[#171614]/10">
         <div className="max-w-[1200px] mx-auto px-6 space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-1.5">
               <h2 className="font-display text-3xl font-medium text-[#171614]">
-                Featured Harvests
+                Featured Spices
               </h2>
               <p className="text-sm text-[#5C5852]">
-                Explore signature jars from this season, or open the full catalog with live search and category filters.
+                Explore signature jars on our shelf, or open the full catalog with live search and category filters.
               </p>
             </div>
             <a
@@ -138,8 +138,6 @@ export function HomePage({ spices }: HomePageProps) {
                         <span className="uppercase tracking-wider font-medium text-[#8C1D2F]">
                           {spice.category}
                         </span>
-                        <span aria-hidden="true">·</span>
-                        <span>{spice.origin.country}</span>
                       </div>
                       <motion.h3
                         layoutId={`spice-title-${spice.id}`}
@@ -156,7 +154,7 @@ export function HomePage({ spices }: HomePageProps) {
                         From {formatUGX(basePrice)}
                       </span>
                       <span className="text-xs font-medium text-[#8C1D2F] group-hover:underline underline-offset-4">
-                        Read Profile
+                        View Spice
                       </span>
                     </div>
                   </div>
@@ -167,25 +165,25 @@ export function HomePage({ spices }: HomePageProps) {
         </div>
       </section>
 
-      {/* Hyperlinked Navigation Strip to Origins, Contact, and TikTok */}
+      {/* Hyperlinked Navigation Strip to Spices & Contact */}
       <section className="py-14 bg-[#EFECE6]/70 border-t border-[#171614]/10">
         <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
           <a
-            href="#/origins"
+            href="#/spices"
             className="group p-8 bg-white rounded-xl border border-[#171614]/8 space-y-3 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200"
           >
             <div className="flex items-center justify-between">
               <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#8C1D2F]">
-                <Compass className="w-4 h-4" />
-                <span>Harvest Provenance</span>
+                <ShoppingBag className="w-4 h-4" />
+                <span>Live Spice Catalog</span>
               </div>
               <ArrowRight className="w-4 h-4 text-[#5C5852] group-hover:text-[#171614] transition-colors" />
             </div>
             <h3 className="font-display text-2xl font-medium text-[#171614]">
-              Explore Our Origins &amp; Milling Ledger
+              Browse All Spices &amp; Jar Sizes
             </h3>
             <p className="text-sm text-[#5C5852] leading-relaxed">
-              Inspect exact harvest coordinates, elevations, curing traditions, and cold-milling practices behind every One Spice jar.
+              Search spices in real time, compare weights and UGX pricing, and order with MTN MoMo, Airtel Pay, or Cash on Delivery.
             </p>
           </a>
 
@@ -204,7 +202,7 @@ export function HomePage({ spices }: HomePageProps) {
               Visit {SHOP_INFO.addressLine1}
             </h3>
             <p className="text-sm text-[#5C5852] leading-relaxed">
-              Open our pinned map location, check counter hours, send a spice request, or watch daily harvest tastings on TikTok {SHOP_INFO.tiktokHandle}.
+              Open our pinned map location, check counter hours, send a spice request, or follow us on TikTok {SHOP_INFO.tiktokHandle}.
             </p>
           </a>
         </div>

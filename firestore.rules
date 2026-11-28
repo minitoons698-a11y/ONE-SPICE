@@ -58,8 +58,7 @@ service cloud.firestore {
     function isValidSpice(data) {
       return data.keys().hasAll([
           'id', 'name', 'botanicalName', 'category', 'grade', 'image', 'imageAlt',
-          'shortDescription', 'inStock', 'lotCode', 'weightTiers', 'tastingNotes',
-          'culinaryUses', 'origin', 'pairings', 'updatedAt'
+          'shortDescription', 'inStock', 'weightTiers', 'pairings', 'updatedAt'
         ])
         && data.keys().hasOnly([
           'id', 'name', 'botanicalName', 'category', 'grade', 'image', 'imageAlt',
@@ -75,27 +74,11 @@ service cloud.firestore {
         && data.imageAlt is string && data.imageAlt.size() <= 240
         && data.shortDescription is string && data.shortDescription.size() >= 1 && data.shortDescription.size() <= 360
         && data.inStock is bool
-        && data.lotCode is string && data.lotCode.size() <= 64
+        && (!('lotCode' in data) || (data.lotCode is string && data.lotCode.size() <= 64))
         && data.weightTiers is list && data.weightTiers.size() >= 1 && data.weightTiers.size() <= 5 && data.weightTiers[0] is map
-        && data.tastingNotes is map
-        && data.tastingNotes.keys().hasAll(['summary', 'aroma', 'palate', 'finish', 'sensory'])
-        && data.tastingNotes.keys().hasOnly(['summary', 'aroma', 'palate', 'finish', 'sensory'])
-        && data.tastingNotes.summary is string && data.tastingNotes.summary.size() <= 600
-        && data.tastingNotes.aroma is string && data.tastingNotes.aroma.size() <= 240
-        && data.tastingNotes.palate is string && data.tastingNotes.palate.size() <= 240
-        && data.tastingNotes.finish is string && data.tastingNotes.finish.size() <= 240
-        && data.tastingNotes.sensory is map
-        && data.culinaryUses is list && data.culinaryUses.size() >= 1 && data.culinaryUses.size() <= 6 && data.culinaryUses[0] is map
-        && data.origin is map
-        && data.origin.keys().hasAll(['country', 'region', 'coordinates', 'elevation', 'harvestSeason', 'curingMethod', 'story'])
-        && data.origin.keys().hasOnly(['country', 'region', 'coordinates', 'elevation', 'harvestSeason', 'curingMethod', 'story'])
-        && data.origin.country is string && data.origin.country.size() <= 80
-        && data.origin.region is string && data.origin.region.size() <= 120
-        && data.origin.coordinates is string && data.origin.coordinates.size() <= 64
-        && data.origin.elevation is string && data.origin.elevation.size() <= 40
-        && data.origin.harvestSeason is string && data.origin.harvestSeason.size() <= 100
-        && data.origin.curingMethod is string && data.origin.curingMethod.size() <= 160
-        && data.origin.story is string && data.origin.story.size() <= 600
+        && (!('tastingNotes' in data) || data.tastingNotes is map)
+        && (!('culinaryUses' in data) || (data.culinaryUses is list && data.culinaryUses.size() <= 6))
+        && (!('origin' in data) || data.origin is map)
         && data.pairings is list && data.pairings.size() <= 6 && (data.pairings.size() == 0 || data.pairings[0] is string)
         && data.updatedAt == request.time;
     }

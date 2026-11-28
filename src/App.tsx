@@ -5,7 +5,6 @@ import { AdminPage } from './components/AdminPage';
 import { BagDrawer, BagItem } from './components/BagDrawer';
 import { AppRoute, Header } from './components/Header';
 import { HomePage } from './components/HomePage';
-import { OriginsPage } from './components/OriginsPage';
 import { SpiceCatalog } from './components/SpiceCatalog';
 import { SpiceProfile } from './components/SpiceProfile';
 import { VisitContactSection } from './components/VisitContactSection';
@@ -30,11 +29,8 @@ function parseHashRoute(hash: string): ParsedRoute {
   if (!clean || clean === '/') {
     return { route: 'home', spiceId: null };
   }
-  if (clean === '/spices') {
+  if (clean === '/spices' || clean === '/origins') {
     return { route: 'spices', spiceId: null };
-  }
-  if (clean === '/origins') {
-    return { route: 'origins', spiceId: null };
   }
   if (clean === '/contact') {
     return { route: 'contact', spiceId: null };
@@ -146,9 +142,8 @@ export default function App() {
       return (
         spice.name.toLowerCase().includes(normalizedQuery) ||
         spice.category.toLowerCase().includes(normalizedQuery) ||
-        spice.botanicalName.toLowerCase().includes(normalizedQuery) ||
-        spice.origin.country.toLowerCase().includes(normalizedQuery) ||
-        spice.origin.region.toLowerCase().includes(normalizedQuery) ||
+        (spice.botanicalName ?? '').toLowerCase().includes(normalizedQuery) ||
+        (spice.grade ?? '').toLowerCase().includes(normalizedQuery) ||
         spice.shortDescription.toLowerCase().includes(normalizedQuery)
       );
     });
@@ -284,17 +279,6 @@ export default function App() {
               </motion.div>
             )}
 
-            {routeState.route === 'origins' && (
-              <motion.div
-                key="origins-page"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <OriginsPage spices={allSpices} />
-              </motion.div>
-            )}
-
             {routeState.route === 'contact' && (
               <motion.div
                 key="contact-page"
@@ -343,9 +327,6 @@ export default function App() {
                 </a>
                 <a href="#/spices" className="hover:text-[#171614] transition-colors whitespace-nowrap">
                   Spices
-                </a>
-                <a href="#/origins" className="hover:text-[#171614] transition-colors whitespace-nowrap">
-                  Origins
                 </a>
                 <a href="#/contact" className="hover:text-[#171614] transition-colors whitespace-nowrap">
                   Visit &amp; Contact
